@@ -2,12 +2,28 @@
 #include <iostream>
 using namespace std;
 
-const int Size = 18;
+const int Size = 20;
+const int Size1 = 20;
+
 void OpenFile(ifstream& infile, string text);
-void ReadFile(ifstream &infile, char insertArray[Size]);
-void OutputResults();
-char wordsToFindArray[18];
-char wordsToSearchArray[14];
+void ReadFile(ifstream &infile, char insertArray[]);
+void ReadFile2D(ifstream &infile, char insertArray[4][14]);
+bool Menu();
+void ReadInPuzzle1();
+void ReadInPuzzle2();
+void SearchPuzzle1();
+void SearchPuzzle2();
+void WriteToFile1();
+void WriteToFile2();
+void OutputSearch1();
+
+char wordsToFindArray1D[18];
+char wordsToSearchArray1D[14];
+
+char wordsToFindArray2D[48];
+char wordsToSearchArray2D[4][14];
+
+
 bool wordsFound[6] = {false, false, false, false, false, false};
 int wordIndex[6];
 
@@ -15,100 +31,31 @@ int main()
 {
 	bool found = false;
 	int index = 0;
-	string text1 = "search1.txt";
-	string text2 = "text1.txt";
-	ifstream searchText;
-	OpenFile(searchText, text1);
-	ifstream text;
-	OpenFile(text, text2);
-	ReadFile(searchText, wordsToFindArray);
-	ReadFile(text, wordsToSearchArray);
-	searchText.close();
-	text.close();
-	system("pause");
-	//string type array;
-	/*for (int i =0; i < sizeof(wordsToFindArray); i++)
-	{
-		cout << wordsToFindArray[i];
-	}
-	system("pause");*/
 
-	for (int i = 0; i < sizeof(wordsToSearchArray); i++)
+	if (Menu())
 	{
-		if (wordsToSearchArray[i] == wordsToFindArray[0])
-		{
-			if (wordsToSearchArray[i + 1] == wordsToFindArray[1])
-			{
-				if (wordsToSearchArray[i+2] == wordsToFindArray[2])
-				{
-					index = i;
-					wordsFound[0] = true;
-					wordIndex[0] = index;
-				}
-			}
-		}
-		else if (wordsToSearchArray[i] == wordsToFindArray[3])
-		{
-			if (wordsToSearchArray[i + 1] == wordsToFindArray[4])
-			{
-				if (wordsToSearchArray[i + 2] == wordsToFindArray[5])
-				{
-					index = i;
-					wordsFound[1] = true;
-					wordIndex[1] = index;
-				}
-			}
-		}
-		else if (wordsToSearchArray[i] == wordsToFindArray[6])
-		{
-			if (wordsToSearchArray[i + 1] == wordsToFindArray[7])
-			{
-				if (wordsToSearchArray[i + 2] == wordsToFindArray[8])
-				{
-					index = i;
-					wordsFound[2] = true;
-					wordIndex[2] = index;
-				}
-			}
-		}
-		else if (wordsToSearchArray[i] == wordsToFindArray[9])
-		{
-			if (wordsToSearchArray[i + 1] == wordsToFindArray[10])
-			{
-				if (wordsToSearchArray[i + 2] == wordsToFindArray[11])
-				{
-					index = i;
-					wordsFound[3] = true;
-					wordIndex[3] = index;
-				}
-			}
-		}
-		else if (wordsToSearchArray[i] == wordsToFindArray[12])
-		{
-			if (wordsToSearchArray[i + 1] == wordsToFindArray[13])
-			{
-				if (wordsToSearchArray[i + 2] == wordsToFindArray[14])
-				{
-					index = i;
-					wordsFound[4] = true;
-					wordIndex[4] = index;
-				}
-			}
-		}
-		else if (wordsToSearchArray[i] == wordsToFindArray[15])
-		{
-			if (wordsToSearchArray[i + 1] == wordsToFindArray[16])
-			{
-				if (wordsToSearchArray[i + 2] == wordsToFindArray[17])
-				{
-					index = i;
-					wordsFound[5] = true;
-					wordIndex[5] = index;
-				}
-			}
-		}
+		ReadInPuzzle1();
+		SearchPuzzle1();
+		OutputSearch1();
+		WriteToFile1();
 	}
-	OutputResults();
+	else
+	{
+		ReadInPuzzle2();
+		SearchPuzzle2();
+		WriteToFile2();
+	}
+
+
+	for (int i =0; i < 4; i++)
+	{
+		for (int j=0; j < 14; j++)
+		{
+			cout << wordsToSearchArray2D[i][j];
+		}
+		cout << endl;
+	}
+
 	system("pause");
 
 }
@@ -124,10 +71,9 @@ void OpenFile(ifstream& infile, string text)
 	}
 }
 
-void ReadFile(ifstream &infile, char insertArray[Size])
+void ReadFile(ifstream &infile, char insertArray[])
 {
 	int i = 0;
-	//infile >> noskipws;
 	while (!infile.eof())
 	{
 		char ch;
@@ -139,20 +85,182 @@ void ReadFile(ifstream &infile, char insertArray[Size])
 		}
 	}
 }
-void OutputResults()
+
+void ReadFile2D(ifstream &infile, char insertArray[4][14])
+{
+	int i = 0;
+	int j = 0;
+	while (!infile.eof())
+	{
+		char ch;
+		infile >> ch;
+		if (!infile.eof())
+		{
+			if (j == 14)
+			{
+				i++;
+				j = 0;
+			}
+			insertArray[i][j] = ch;
+			j++;
+		}
+	}
+}
+
+bool Menu()
+{
+	cout << "What do you want to search" << endl << "1) Puzzle 1" << endl << "2) Puzzle 2" << endl;
+	char answer;
+	cin >> answer;
+	if (answer == '1')
+	{
+		return true;
+	}
+	else if (answer == '2')
+	{
+		return false;
+	}
+	return true;
+}
+
+void ReadInPuzzle1()
+{
+	string searchTextFile1D = "search1.txt";
+	string scrambledText1D = "text1.txt";
+	ifstream searchText1D;
+	OpenFile(searchText1D, searchTextFile1D);
+	ifstream text1D;
+	OpenFile(text1D, scrambledText1D);
+	ReadFile(searchText1D, wordsToFindArray1D);
+	ReadFile(text1D, wordsToSearchArray1D);
+	searchText1D.close();
+	text1D.close();
+}
+
+void ReadInPuzzle2()
+{
+	string searchTextFile2D = "search2D.txt";
+	string scrambledText2D = "text2D.txt";
+	ifstream searchText2D;
+	ifstream text2D;
+	OpenFile(searchText2D, searchTextFile2D);
+	OpenFile(text2D, scrambledText2D);
+	ReadFile(searchText2D, wordsToFindArray2D);
+	ReadFile2D(text2D, wordsToSearchArray2D);
+	searchText2D.close();
+	text2D.close();
+}
+
+void SearchPuzzle1()
+{
+	for (int i = 0; i < sizeof(wordsToSearchArray1D); i++)
+	{
+		for (int j = 0; j < sizeof(wordsToFindArray1D); j+=3)
+		{
+			if (wordsToSearchArray1D[i] == wordsToFindArray1D[j] && wordsToSearchArray1D[i +1] == wordsToFindArray1D[j +1]  && wordsToSearchArray1D[i+ 2] == wordsToFindArray1D[j + 2])
+			{
+				cout << wordsToFindArray1D[j] << wordsToFindArray1D[j+1] << wordsToFindArray1D[j+2] << " Found at " << i << endl;
+				wordsToSearchArray1D[i] = '.';
+				wordsToSearchArray1D[i+1] = '.';
+				wordsToSearchArray1D[i+2] = '.';
+			}
+		}
+	}
+}
+
+void OutputSearch1()
 {
 	int j = 0;
-	for (int i = 0; i < sizeof(wordsToFindArray); i += 3)
+	for (int i = 0; i < 6; i++)
 	{
-		if (wordsFound[j] == true)
+		if (wordsFound[i] == true)
 		{
-			cout << wordsToFindArray[i] << wordsToFindArray[i + 1] << wordsToFindArray[i + 2] << " Found at " << wordIndex[j] << endl;
-			j++;
+			cout << wordsToFindArray1D[j] << wordsToFindArray1D[j + 1] << wordsToFindArray1D[j + 2] << " Found at " << wordIndex[i] << endl;
 		}
 		else
 		{
-			cout << wordsToFindArray[i] << wordsToFindArray[i + 1] << wordsToFindArray[i + 2] << " Not Found" << endl;
+			cout << wordsToFindArray1D[j] << wordsToFindArray1D[j + 1] << wordsToFindArray1D[j + 2] << " Not Found" << endl;
 		}
-		//cout << wordsFound[i] << "at" << wordIndex[i] << endl;
+		j += 3;
 	}
+}
+
+void SearchPuzzle2()
+{
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 14; j++)
+		{
+			for (int k=0; k<sizeof(wordsToFindArray2D); k+=3)
+			{
+				if (wordsToSearchArray2D[i][j] == wordsToFindArray2D[k] && wordsToSearchArray2D[i][j + 1] == wordsToFindArray2D[k + 1] && wordsToSearchArray2D[i][j + 2] == wordsToFindArray2D[k + 2])
+				{
+					cout << wordsToSearchArray2D[i][j] << wordsToSearchArray2D[i][j + 1] << wordsToSearchArray2D[i][j + 2] << " Found, " << "line " << i << " location " << j  + 2<< endl;
+					wordsToSearchArray2D[i][j] = '.';
+					wordsToSearchArray2D[i][j+1] = '.';
+					wordsToSearchArray2D[i][j+2] = '.';
+				}
+				else if ((wordsToSearchArray2D[i][j] == wordsToFindArray2D[k + 2] && wordsToSearchArray2D[i][j + 1] == wordsToFindArray2D[k + 1] && wordsToSearchArray2D[i][j + 2] == wordsToFindArray2D[k]) ||
+						 (wordsToSearchArray2D[i][j] == wordsToFindArray2D[k + 2] && wordsToSearchArray2D[i][j + 2] == wordsToFindArray2D[k]))
+				{
+					
+					cout << wordsToSearchArray2D[i][j + 2] << wordsToSearchArray2D[i][j + 1]  << wordsToSearchArray2D[i][j] << " Found, " << "line " << i << " location " << j + 2 << endl;
+					if (wordsToSearchArray2D[i][j] == 't')
+					{
+						wordsToSearchArray2D[i][j + 2] = '.';
+						wordsToSearchArray2D[i][j + 1] = '.';
+					}
+					if (wordsToSearchArray2D[i][j] == 't' && wordsToSearchArray2D[i + 1][j] == 'a' && wordsToSearchArray2D[i + 2][j] == 'b')
+					{
+						cout << wordsToSearchArray2D[i + 2][j] << wordsToSearchArray2D[i + 1][j] << wordsToSearchArray2D[i][j] << " Found, " << "line " << i + 2 << " location " << j << endl;
+						wordsToSearchArray2D[i + 2][j] = '.';
+						wordsToSearchArray2D[i + 1][j] = '.';
+						wordsToSearchArray2D[i][j] = '.';
+					}
+					wordsToSearchArray2D[i][j + 2] = '.';
+					wordsToSearchArray2D[i][j] = '.';
+				}
+				else if (wordsToSearchArray2D[i][j] == wordsToFindArray2D[k] && wordsToSearchArray2D[i + 1][j] == wordsToFindArray2D[k + 1] && wordsToSearchArray2D[i+ 2][j] == wordsToFindArray2D[k + 2])
+				{
+					cout << wordsToSearchArray2D[i][j] << wordsToSearchArray2D[i+1][j] << wordsToSearchArray2D[i+2][j] << " Found, " << "line " << i << " location " << j << endl;
+					wordsToSearchArray2D[i][j] = '.';
+					wordsToSearchArray2D[i+1][j] = '.';
+					wordsToSearchArray2D[i+2][j] = '.';
+				}
+			}
+			
+		}
+	}
+}
+
+void WriteToFile1()
+{
+	ofstream outputToFile1("text1Filtered.txt");
+	if (!outputToFile1)
+	{
+		cout << "Cannot open output file" << endl;
+	}
+	for (int i = 0; i < 14; i++)
+	{
+		outputToFile1 << wordsToSearchArray1D[i];
+	}
+	outputToFile1.close();
+}
+
+void WriteToFile2()
+{
+	ofstream outputToFile2("text2Filtered.txt");
+	if (!outputToFile2)
+	{
+		cout << "Cannot open output file" << endl;
+	}
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 14; j++)
+		{
+			outputToFile2 << wordsToSearchArray2D[i][j];
+		}
+		outputToFile2 << endl;
+	}
+	outputToFile2.close();
 }
