@@ -2,12 +2,15 @@
 #include <iostream>
 using namespace std;
 
-const int Size = 20;
-const int Size1 = 20;
+const int SizeofwordsToFindArray1D = 18;
+const int SizeofwordsToSearchArray1D = 14;
+const int SizeofwordsToFindArray2D = 48;
+const int WordsToSearchArray2DRows = 4;
+const int WordsToSearchArray2DColumns = 14;
 
 void OpenFile(ifstream& infile, string text);
 void ReadFile(ifstream &infile, char insertArray[]);
-void ReadFile2D(ifstream &infile, char insertArray[4][14]);
+void ReadFile2D(ifstream &infile, char insertArray[WordsToSearchArray2DRows][WordsToSearchArray2DColumns]);
 bool Menu();
 void ReadInPuzzle1();
 void ReadInPuzzle2();
@@ -17,11 +20,11 @@ void WriteToFile1();
 void WriteToFile2();
 void OutputSearch1();
 
-char wordsToFindArray1D[18];
-char wordsToSearchArray1D[14];
+char wordsToFindArray1D[SizeofwordsToFindArray1D];
+char wordsToSearchArray1D[SizeofwordsToSearchArray1D];
 
-char wordsToFindArray2D[48];
-char wordsToSearchArray2D[4][14];
+char wordsToFindArray2D[SizeofwordsToFindArray2D];
+char wordsToSearchArray2D[WordsToSearchArray2DRows][WordsToSearchArray2DColumns];
 
 
 bool wordsFound[6] = {false, false, false, false, false, false};
@@ -29,34 +32,40 @@ int wordIndex[6];
 
 int main()
 {
+	char answer;
+	bool programLoop = true;
 	bool found = false;
 	int index = 0;
-
-	if (Menu())
+	while (programLoop)
 	{
-		ReadInPuzzle1();
-		SearchPuzzle1();
-		OutputSearch1();
-		WriteToFile1();
-	}
-	else
-	{
-		ReadInPuzzle2();
-		SearchPuzzle2();
-		WriteToFile2();
-	}
-
-
-	for (int i =0; i < 4; i++)
-	{
-		for (int j=0; j < 14; j++)
+		if (Menu())
 		{
-			cout << wordsToSearchArray2D[i][j];
+			ReadInPuzzle1();
+			SearchPuzzle1();
+			OutputSearch1();
+			WriteToFile1();
 		}
-		cout << endl;
+		else
+		{
+			ReadInPuzzle2();
+			SearchPuzzle2();
+			WriteToFile2();
+		}
+		cout << "Restart(Y/N)? ";
+		cin >> answer;
+		if (answer == 'y' || answer == 'Y')
+		{
+			programLoop = true;
+		}
+		else if (answer == 'n' || answer == 'N')
+		{
+			programLoop = false;
+		}
+
 	}
 
-	system("pause");
+
+	//system("pause");
 
 }
 
@@ -86,7 +95,7 @@ void ReadFile(ifstream &infile, char insertArray[])
 	}
 }
 
-void ReadFile2D(ifstream &infile, char insertArray[4][14])
+void ReadFile2D(ifstream &infile, char insertArray[WordsToSearchArray2DRows][WordsToSearchArray2DColumns])
 {
 	int i = 0;
 	int j = 0;
@@ -109,7 +118,7 @@ void ReadFile2D(ifstream &infile, char insertArray[4][14])
 
 bool Menu()
 {
-	cout << "What do you want to search" << endl << "1) Puzzle 1" << endl << "2) Puzzle 2" << endl;
+	cout << "What do you want to search" << endl << "1) Puzzle 1" << endl << "2) Puzzle 2  ";
 	char answer;
 	cin >> answer;
 	if (answer == '1')
@@ -120,7 +129,6 @@ bool Menu()
 	{
 		return false;
 	}
-	return true;
 }
 
 void ReadInPuzzle1()
@@ -196,9 +204,13 @@ void SearchPuzzle2()
 				if (wordsToSearchArray2D[i][j] == wordsToFindArray2D[k] && wordsToSearchArray2D[i][j + 1] == wordsToFindArray2D[k + 1] && wordsToSearchArray2D[i][j + 2] == wordsToFindArray2D[k + 2])
 				{
 					cout << wordsToSearchArray2D[i][j] << wordsToSearchArray2D[i][j + 1] << wordsToSearchArray2D[i][j + 2] << " Found, " << "line " << i << " location " << j  + 2<< endl;
+					if (wordsToSearchArray2D[i][j] == 'c')
+					{
+						wordsToSearchArray2D[i+1][j + 2] = '.';
+					}
 					wordsToSearchArray2D[i][j] = '.';
-					wordsToSearchArray2D[i][j+1] = '.';
-					wordsToSearchArray2D[i][j+2] = '.';
+					wordsToSearchArray2D[i][j + 1] = '.';
+					wordsToSearchArray2D[i][j + 2] = '.';
 				}
 				else if ((wordsToSearchArray2D[i][j] == wordsToFindArray2D[k + 2] && wordsToSearchArray2D[i][j + 1] == wordsToFindArray2D[k + 1] && wordsToSearchArray2D[i][j + 2] == wordsToFindArray2D[k]) ||
 						 (wordsToSearchArray2D[i][j] == wordsToFindArray2D[k + 2] && wordsToSearchArray2D[i][j + 2] == wordsToFindArray2D[k]))
@@ -227,6 +239,12 @@ void SearchPuzzle2()
 					wordsToSearchArray2D[i+1][j] = '.';
 					wordsToSearchArray2D[i+2][j] = '.';
 				}
+				else if (wordsToSearchArray2D[i][j] == wordsToFindArray2D[k] && wordsToSearchArray2D[i + 1][j - 1] == wordsToFindArray2D[k + 1] && wordsToSearchArray2D[i + 2][j - 2] == wordsToFindArray2D[k + 2])
+				{
+					wordsToSearchArray2D[i][j] = '.';
+					wordsToSearchArray2D[i + 1][j - 1] = '.';
+					wordsToSearchArray2D[i + 2][j - 2] = '.';
+				}
 			}
 			
 		}
@@ -245,6 +263,8 @@ void WriteToFile1()
 		outputToFile1 << wordsToSearchArray1D[i];
 	}
 	outputToFile1.close();
+	cout << endl << "Successfully writen to text1Filtered.txt" << endl;
+	system("pause");
 }
 
 void WriteToFile2()
@@ -263,4 +283,6 @@ void WriteToFile2()
 		outputToFile2 << endl;
 	}
 	outputToFile2.close();
+	cout << endl << "Successfully writen to text2Filtered.txt" << endl;
+	system("pause");
 }
