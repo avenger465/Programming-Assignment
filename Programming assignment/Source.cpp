@@ -3,37 +3,32 @@
 #include <iostream>
 using namespace std;
 
-//Variables that will define the variable sizes
+//Variables that will define the 1 Dimensional array sizes
 const int SizeofwordsToFindArray1D = 18;
 const int SizeofwordsToSearchArray1D = 14;
+
+//Variables that will define the 2 Dimensional array sizes
 const int SizeofwordsToFindArray2D = 48;
 const int WordsToSearchArray2DRows = 4;
 const int WordsToSearchArray2DColumns = 14;
+
+//Variables that will define the size of the arrays to hold information about the 1 Dimensional Search
+const int SizeOfWordsFoundArray = 6;
+const int SizeOfWordIndexArray = 6;
 
 //Function prototype calls 
 void OpenFile(ifstream& infile, string text);
 void ReadFile(ifstream &infile, char insertArray[]);
 void ReadFile2D(ifstream &infile, char insertArray[WordsToSearchArray2DRows][WordsToSearchArray2DColumns]);
 bool Menu();
-void ReadInPuzzle1();
-void ReadInPuzzle2();
-void SearchPuzzle1();
-void SearchPuzzle2();
-void WriteToFile1();
-void WriteToFile2();
-void OutputSearch1();
+void ReadInPuzzle1(char wordsToFindArray1D[SizeofwordsToFindArray1D], char wordsToSearchArray1D[SizeofwordsToSearchArray1D]);
+void ReadInPuzzle2(char wordsToFindArray2D[SizeofwordsToFindArray2D], char wordsToSearchArray2D[WordsToSearchArray2DRows][WordsToSearchArray2DColumns]);
+void SearchPuzzle1(char wordsToFindArray1D[SizeofwordsToFindArray1D], char wordsToSearchArray1D[SizeofwordsToSearchArray1D], bool wordsFound[SizeOfWordsFoundArray], int wordIndex[SizeOfWordIndexArray]);
+void SearchPuzzle2(char wordsToSearchArray2D[WordsToSearchArray2DRows][WordsToSearchArray2DColumns], char wordsToFindArray2D[SizeofwordsToFindArray2D]);
+void WriteToFile1(char wordsToSearchArray1D[SizeofwordsToSearchArray1D]);
+void WriteToFile2(char wordsToSearchArray2D[WordsToSearchArray2DRows][WordsToSearchArray2DColumns]);
+void OutputSearch1(bool wordsFound[SizeOfWordsFoundArray], char wordsToFindArray1D[SizeofwordsToFindArray1D], int wordIndex[SizeOfWordIndexArray]);
 
-//definitions of the arrays used for the 1D puzzle
-char wordsToFindArray1D[SizeofwordsToFindArray1D];
-char wordsToSearchArray1D[SizeofwordsToSearchArray1D];
-
-//definitions of the arrays used for the 2D puzzle
-char wordsToFindArray2D[SizeofwordsToFindArray2D];
-char wordsToSearchArray2D[WordsToSearchArray2DRows][WordsToSearchArray2DColumns];
-
-
-bool wordsFound[6] = {false, false, false, false, false, false};
-int wordIndex[6];
 
 //The main function used in the program 
 int main()
@@ -44,25 +39,44 @@ int main()
 	bool found = false;
 	int index = 0;
 
+	//definitions of the arrays used for the 1D puzzle
+	char wordsToFindArray1D[SizeofwordsToFindArray1D];
+	char wordsToSearchArray1D[SizeofwordsToSearchArray1D];
+
+	//definitions of the arrays used for the 2D puzzle
+	char wordsToFindArray2D[SizeofwordsToFindArray2D];
+	char wordsToSearchArray2D[WordsToSearchArray2DRows][WordsToSearchArray2DColumns];
+
+	//Arrays that contain information regarding if the word has been found and its location if it has
+	bool wordsFound[6] = { false, false, false, false, false, false };
+	int wordIndex[6];
+
 	//Loop to go through the program and ask the user which puzzle they want to do.
 	//The program will then go through the puzzle inputed and perform the search
 	while (programLoop)
 	{
 		if (Menu())
 		{
-			ReadInPuzzle1();
-			SearchPuzzle1();
-			OutputSearch1();
-			WriteToFile1();
+			ReadInPuzzle1(wordsToFindArray1D, wordsToSearchArray1D);
+			SearchPuzzle1(wordsToFindArray1D, wordsToSearchArray1D, wordsFound, wordIndex);
+			OutputSearch1(wordsFound, wordsToFindArray1D, wordIndex);
+			WriteToFile1(wordsToSearchArray1D);
 		}
 		else
 		{
-			ReadInPuzzle2();
-			SearchPuzzle2();
-			WriteToFile2();
+			ReadInPuzzle2(wordsToFindArray2D, wordsToSearchArray2D);
+			SearchPuzzle2(wordsToSearchArray2D, wordsToFindArray2D);
+			WriteToFile2(wordsToSearchArray2D);
 		}
+
+		//Clears the screen for the user
+		system("CLS");
+
+		//Asks the user if they want to go through the program again allowing them to use another puzzle
 		cout << "Restart(Y/N)? ";
 		cin >> goThroughLoopChar;
+
+		//Checks the users input
 		if (goThroughLoopChar == 'y' || goThroughLoopChar == 'Y')
 		{
 			programLoop = true;
@@ -125,7 +139,6 @@ void ReadFile2D(ifstream &infile, char insertArray[WordsToSearchArray2DRows][Wor
 		infile >> ch;
 		if (!infile.eof())
 		{
-
 			//Checks if the end of the current row in the array has been reached
 			//and then resets the column index back to zero
 			if (arrayColumn == 14)
@@ -146,7 +159,7 @@ bool Menu()
 	char choosePuzzle;
 
 	//Displays a prompt for the user to answer and reads in that input
-	cout << "What do you want to search" << endl << "1) Puzzle 1" << endl << "2) Puzzle 2  ";
+	cout << "What do you want to search" << endl << "1) Puzzle 1" << endl << "2) Puzzle 2  " << endl;
 	cin >> choosePuzzle;
 
 	//Returns the required value depending on the users input
@@ -161,7 +174,7 @@ bool Menu()
 }
 
 //Function to read in the required files into their respective arrays
-void ReadInPuzzle1()
+void ReadInPuzzle1(char wordsToFindArray1D[SizeofwordsToFindArray1D], char wordsToSearchArray1D[SizeofwordsToSearchArray1D])
 {
 	//Initiales the required filenames
 	string searchTextFile1D = "search1.txt";
@@ -183,7 +196,7 @@ void ReadInPuzzle1()
 }
 
 //Function to read in the required files into their respective arrays
-void ReadInPuzzle2()
+void ReadInPuzzle2(char wordsToFindArray2D[SizeofwordsToFindArray2D], char wordsToSearchArray2D[WordsToSearchArray2DRows][WordsToSearchArray2DColumns])
 {
 	//Initiales the required filenames
 	string searchTextFile2D = "search2D.txt";
@@ -205,74 +218,97 @@ void ReadInPuzzle2()
 }
 
 //Function to search through the puzzle array looking for the words
-void SearchPuzzle1()
+void SearchPuzzle1(char wordsToFindArray1D[SizeofwordsToFindArray1D], char wordsToSearchArray1D[SizeofwordsToSearchArray1D], bool wordsFound[SizeOfWordsFoundArray], int wordIndex[SizeOfWordIndexArray])
 {
+	int wordsFoundIndex = 0;
+
 	// goes through each character in the wordsToSearchArray1D and checks if it is equal to 
 	// the search term
-	for (int i = 0; i < sizeof(wordsToSearchArray1D); i++)
+	for (int i = 0; i < SizeofwordsToFindArray1D; i +=3)
 	{
-		for (int j = 0; j < sizeof(wordsToFindArray1D); j+=3)
+		if (wordsFoundIndex == 6)
 		{
-			if (wordsToSearchArray1D[i] == wordsToFindArray1D[j] && wordsToSearchArray1D[i +1] == wordsToFindArray1D[j +1]  && wordsToSearchArray1D[i+ 2] == wordsToFindArray1D[j + 2])
+			break;
+		}
+		for (int j = 0; j < SizeofwordsToSearchArray1D; j++)
+		{
+			if (wordsToFindArray1D[i] == wordsToSearchArray1D[j] && wordsToFindArray1D[i + 1] == wordsToSearchArray1D[j + 1] && wordsToFindArray1D[i + 2] == wordsToSearchArray1D[j + 2])
 			{
-				//Outputs that the word has been found and replaces its characters with fullstops: '.', in the array
-				cout << wordsToFindArray1D[j] << wordsToFindArray1D[j+1] << wordsToFindArray1D[j+2] << " Found at " << i << endl;
-				wordsToSearchArray1D[i] = '.';
-				wordsToSearchArray1D[i+1] = '.';
-				wordsToSearchArray1D[i+2] = '.';
+				//cout << wordsToFindArray1D[i] << wordsToFindArray1D[i + 1] << wordsToFindArray1D[i + 2] << " Found at " << j << endl;
+				wordsToSearchArray1D[j] = '.';
+				wordsToSearchArray1D[j + 1] = '.';
+				wordsToSearchArray1D[j + 2] = '.';
+				wordsFound[wordsFoundIndex] = true;
+				wordIndex[wordsFoundIndex] = j;
 			}
 		}
+		wordsFoundIndex++;
 	}
 }
 
-void OutputSearch1()
+//Function to go through the wordsFound array to display whether the word was found in Puzzle 1
+void OutputSearch1(bool wordsFound[SizeOfWordsFoundArray], char wordsToFindArray1D[SizeofwordsToFindArray1D], int wordIndex[SizeOfWordIndexArray])
 {
-	int j = 0;
+	//Declarations of the variables to be used
+	int startOfSearchWords = 0;
+
+	//Goes through each element in the wordsFound array and displays whether that word has been found and if 
+	//it has then display the corresponding value from the wordIndex array
 	for (int i = 0; i < 6; i++)
 	{
 		if (wordsFound[i] == true)
 		{
-			cout << wordsToFindArray1D[j] << wordsToFindArray1D[j + 1] << wordsToFindArray1D[j + 2] << " Found at " << wordIndex[i] << endl;
+			cout << wordsToFindArray1D[startOfSearchWords] << wordsToFindArray1D[startOfSearchWords + 1] << wordsToFindArray1D[startOfSearchWords + 2] << " Found at " << wordIndex[i] << endl;
 		}
 		else
 		{
-			cout << wordsToFindArray1D[j] << wordsToFindArray1D[j + 1] << wordsToFindArray1D[j + 2] << " Not Found" << endl;
+			cout << wordsToFindArray1D[startOfSearchWords] << wordsToFindArray1D[startOfSearchWords + 1] << wordsToFindArray1D[startOfSearchWords + 2] << " Not Found" << endl;
 		}
-		j += 3;
+		startOfSearchWords += 3;
 	}
 }
 
-void SearchPuzzle2()
+//Function to go through the 2 Dimensional array looking for the words in the requried array
+void SearchPuzzle2(char wordsToSearchArray2D[WordsToSearchArray2DRows][WordsToSearchArray2DColumns], char wordsToFindArray2D[SizeofwordsToFindArray2D])
 {
-	for (int i = 0; i < 4; i++)
+	//Runs through each row of the wordsToSearchArray
+	for (int i = 0; i < WordsToSearchArray2DRows; i++)
 	{
-		for (int j = 0; j < 14; j++)
+		//Runs though each column of the WordsToSearchArray
+		for (int j = 0; j < WordsToSearchArray2DColumns; j++)
 		{
-			for (int k=0; k<sizeof(wordsToFindArray2D); k+=3)
+			//Runs through each word in the wordsToFindArray
+			for (int k=0; k < SizeofwordsToFindArray2D; k+=3)
 			{
-				//Check for words going forward
+				//Check for words going forward:
+				//Checks each character and sees of the nex to characters in the array match the word in the wordsToFindArray array exactly
+				//If it does it will then change those characters to '.' and output that the word has been found
 				if (wordsToSearchArray2D[i][j] == wordsToFindArray2D[k] && wordsToSearchArray2D[i][j + 1] == wordsToFindArray2D[k + 1] && wordsToSearchArray2D[i][j + 2] == wordsToFindArray2D[k + 2])
 				{
 					cout << wordsToSearchArray2D[i][j] << wordsToSearchArray2D[i][j + 1] << wordsToSearchArray2D[i][j + 2] << " Found, " << "line " << i << " location " << j  + 2<< endl;
-					/*if (wordsToSearchArray2D[i][j] == 'c')
-					{
-						wordsToSearchArray2D[i+1][j + 2] = '.';
-					}*/
 					wordsToSearchArray2D[i][j] = '.';
 					wordsToSearchArray2D[i][j + 1] = '.';
 					wordsToSearchArray2D[i][j + 2] = '.';
 				}
-				//Check for words going backward
+
+				//Check for words going backward:
+				//Checks each character and sees if the next to characters in the array match the words backwards in the wordsToFindArray exactly
+				//If it does it will then change those characters to '.' and output that the words has been found
 				else if ((wordsToSearchArray2D[i][j] == wordsToFindArray2D[k + 2] && wordsToSearchArray2D[i][j + 1] == wordsToFindArray2D[k + 1] && wordsToSearchArray2D[i][j + 2] == wordsToFindArray2D[k]) ||
 						 (wordsToSearchArray2D[i][j] == wordsToFindArray2D[k + 2] && wordsToSearchArray2D[i][j + 2] == wordsToFindArray2D[k]))
 				{
 					
 					cout << wordsToSearchArray2D[i][j + 2] << wordsToSearchArray2D[i][j + 1]  << wordsToSearchArray2D[i][j] << " Found, " << "line " << i << " location " << j + 2 << endl;
+
+					//Checks if the current character is equal to 't' and then sets the next to characters to '.'
+					//It does this to allow the program to check for other words requiring the letter 't'
 					if (wordsToSearchArray2D[i][j] == 't')
 					{
-						wordsToSearchArray2D[i][j + 2] = '.';
 						wordsToSearchArray2D[i][j + 1] = '.';
+						wordsToSearchArray2D[i][j + 2] = '.';
 					}
+
+					//Checks if the currently selected characters is equal to 'bat' and then sets the three characters in the column to '.'
 					if (wordsToSearchArray2D[i][j] == 't' && wordsToSearchArray2D[i + 1][j] == 'a' && wordsToSearchArray2D[i + 2][j] == 'b')
 					{
 						cout << wordsToSearchArray2D[i + 2][j] << wordsToSearchArray2D[i + 1][j] << wordsToSearchArray2D[i][j] << " Found, " << "line " << i + 2 << " location " << j << endl;
@@ -280,10 +316,15 @@ void SearchPuzzle2()
 						wordsToSearchArray2D[i + 1][j] = '.';
 						wordsToSearchArray2D[i + 2][j] = '.';
 					}
+
+					//Sets the current character and the 2 next character to '.'
 					wordsToSearchArray2D[i][j + 2] = '.';
 					wordsToSearchArray2D[i][j] = '.';
 				}
-				//Check for words going vertical
+
+				//Check for words going vertical:
+				//Checks if the current character and the next two characters down the column match the words in the wordsToFindArray exactly 
+				//If it does it will then change those characters to '.' and output that the words has been found
 				else if (wordsToSearchArray2D[i][j] == wordsToFindArray2D[k] && wordsToSearchArray2D[i + 1][j] == wordsToFindArray2D[k + 1] && wordsToSearchArray2D[i+ 2][j] == wordsToFindArray2D[k + 2])
 				{
 					cout << wordsToSearchArray2D[i][j] << wordsToSearchArray2D[i+1][j] << wordsToSearchArray2D[i+2][j] << " Found, " << "line " << i << " location " << j << endl;
@@ -291,7 +332,10 @@ void SearchPuzzle2()
 					wordsToSearchArray2D[i+1][j] = '.';
 					wordsToSearchArray2D[i+2][j] = '.';
 				}
-				//check for words going diagonal left
+
+				//check for words going diagonal left:
+				//Checks if the the current character and the next two characters diagonally left match the words in the wordsToFindArray exactly
+				//If it does it will then change those characters to '.' and output that the words has been found
 				else if (wordsToSearchArray2D[i][j] == wordsToFindArray2D[k] && wordsToSearchArray2D[i + 1][j - 1] == wordsToFindArray2D[k + 1] && wordsToSearchArray2D[i + 2][j - 2] == wordsToFindArray2D[k + 2])
 				{
 					cout << wordsToSearchArray2D[i][j] << wordsToSearchArray2D[i + 1][j - 1] << wordsToSearchArray2D[i + 2][j - 2] << " Found, " << "line " << i << " location " << j << endl;
@@ -306,7 +350,7 @@ void SearchPuzzle2()
 }
 
 //Function to write the updated array into the 'text1Filtered.txt' file.
-void WriteToFile1()
+void WriteToFile1(char wordsToSearchArray1D[SizeofwordsToSearchArray1D])
 {
 	//Opens the file to be written into and performs a check whether the file could be opened
 	ofstream outputToFile1("text1Filtered.txt");
@@ -330,7 +374,7 @@ void WriteToFile1()
 }
 
 //Function to write the updated array into the 'text2Filtered.txt' file.
-void WriteToFile2()
+void WriteToFile2(char wordsToSearchArray2D[WordsToSearchArray2DRows][WordsToSearchArray2DColumns])
 {
 	//Opens the file to be written into and performs a check whether the file could be opened
 	ofstream outputToFile2("text2Filtered.txt");
