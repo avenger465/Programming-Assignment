@@ -1,2 +1,2 @@
 # Programming-Assignment
-Repository for the Programming assignment
+Repository for a Word Search program created for an assignment from year one of university 
